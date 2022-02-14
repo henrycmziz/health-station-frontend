@@ -1,0 +1,114 @@
+kind: pipeline
+type: docker
+name: hs-frontend-ci
+
+steps:
+  # ”依赖模块缓存“恢复
+  - name: restore-cache
+    pull: if-not-exists
+    image: drillster/drone-volume-cache
+    volumes:
+      - name: node-modules-cache
+        path: /cache
+    settings:
+      restore: true
+      mount:
+        - ./node_modules
+
+  # 构建前端
+  - name: build-dist
+    pull: if-not-exists
+    image: node:16.13-alpine
+    volumes:
+      - name: frontend-temp
+        path: /workspace
+    commands:
+      - npm install --registry=https://registry.npm.taobao.org
+      - npm run build:prod
+      - cp -r nginx/ /workspace
+      - cp -r dist/ /workspace/dist_new
+      - cp .env /workspace/.env
+      - cp docker-compose.yml /workspace/docker-compose.yml
+      - cp deploy.sh /workspace/deploy.sh
+
+  # 部署运行
+  - name: docker-deploy
+    image: appleboy/drone-ssh # ssh工具镜像
+    settings:
+      host:
+        from_secret: ssh_host
+      username: root # 远程连接账号
+      password:
+        from_secret: ssh_password # 从Secret中读取SSH密码
+      port: 22 # 远程连接端口
+      command_timeout: 10m # 远程执行命令超时时间
+      script_stop: false # 设置为false，遇到第一次错误会继续运行后面的命令
+      script:
+        - cd /app/health-station/frontend # 进入宿主机构建目录,可根据自己选择目录
+        - chmod +x deploy.sh # 更改为可执行脚本
+        - ./deploy.sh # 运行脚本打包应用镜像并运行
+
+  # 钉钉通知
+  - name: dingtalk-notice
+    image: lddsb/drone-dingtalk-message
+    settings:
+      token:
+        from_secret: dingtalk_token
+      secret:
+        from_secret: dingtalk_secret
+      type: markdown
+      tips_title: hs-frontend-ci-info
+      success_color: 09c270
+      failure_color: ff3c3c
+      tpl_build_status_success: "======== √  SUCCESS ========"
+      tpl_build_status_failure: "======== ×  FAILURE ========"
+      debug: true
+      tpl: |
+        # <font color=[TPL_STATUS_COLOR]> [TPL_BUILD_STATUS] </font>
+
+        ### 📁 [TPL_REPO_SHORT_NAME]
+
+        > 👨 [TPL_AUTHOR_NAME] | 🔀 [TPL_COMMIT_BRANCH] | ⏱️ `[TPL_BUILD_CONSUMING]s`
+        ___
+
+        💬 **Commit Message**
+
+        > [TPL_COMMIT_MSG]
+        ___
+
+        👇 **Detail**
+
+        [🔗 Committed Code Detail Page]([TPL_COMMIT_LINK])
+
+        [🔗 The Build Detail Page [TPL_STATUS_EMOTICON]]([TPL_BUILD_LINK])
+        ___
+    when:
+      status: [ success,failure ]
+
+
+  # “依赖模块缓存”更新
+  - name: rebuild-cache
+    pull: if-not-exists
+    image: drillster/drone-volume-cache
+    volumes:
+      - name: node-modules-cache
+        path: /cache
+    settings:
+      rebuild: true
+      mount:
+        - ./node_modules
+
+volumes: # 定义流水线挂载目录，用于共享数据
+  - name: node-modules-cache
+    host:
+      path: /app/health-station/frontend/cache
+  - name: frontend-temp
+    host:
+      path: /app/health-station/frontend
+
+# drone执行触发分支
+trigger:
+  branch:
+    - master
+  event:
+    - push

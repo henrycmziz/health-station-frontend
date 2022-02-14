@@ -1,0 +1,20 @@
+version: '3'
+services:
+  hs-frontend:
+    image: nginx:1.20.2
+    container_name: hs-frontend
+#    为能够使用 ptrace 命令调试
+#    cap_add:
+#      - SYS_PTRACE
+    volumes:
+      - /app/health-station/frontend/nginx/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
+      - /app/health-station/frontend/dist:/usr/share/nginx/html #静态资源根目录挂载
+      - /app/health-station/dockerData/nginx/log:/var/log/nginx #日志文件挂载
+    ports:
+      - "80:80"
+    networks:
+      - hs_net
+
+networks:
+  hs_net:
+    external: true
