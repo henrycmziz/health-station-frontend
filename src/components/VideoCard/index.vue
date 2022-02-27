@@ -6,9 +6,9 @@
       :src="img"
     >
     <!--    标题-->
-    <span class="title">{{ title }}</span>
+    <span class="video-title">{{ title }}</span>
     <!--    时长-->
-    <span class="duration">{{ duration }}</span>
+    <span class="video-duration">{{ duration }}</span>
     <!--    自定义点击事件-->
     <span @click="handleClick" class="hover-mask_actions">
           <slot name="action"></slot>
@@ -108,7 +108,7 @@ export default {
   display: block;
 }
 
-.title {
+.video-title {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -125,11 +125,11 @@ export default {
   /* 一行显示 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  /*-webkit-line-clamp: 1;*/
+  -webkit-line-clamp: 1;
   overflow: hidden;
 }
 
-.duration {
+.video-duration {
   background: rgba(0,0,0,.5);
   border-radius: 0 0 0 5px;
   color: #fff;

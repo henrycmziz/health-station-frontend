@@ -145,6 +145,7 @@
       <el-card style="margin-top: -30px;">
         <video-player ref="videoPlayer"
                       :options="playerOptions"
+                      :playsinline="true"
                       class="video-player vjs-custom-skin"
         ></video-player>
       </el-card>
@@ -165,6 +166,7 @@ export default {
     return {
       baseUrl: process.env.VUE_APP_BASE_API,
       // 上传参数
+      fileSize: 1024,
       upload: {
         // 是否禁用上传
         isUploading: false,
