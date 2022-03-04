@@ -16,14 +16,12 @@
           placeholder="视频状态"
           clearable
           size="small"
-          style="width: 240px"
         >
           <el-option
-            v-for="dict in dict.type.sys_normal_disable"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"/>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -100,8 +98,8 @@
           <el-col :span="12">
             <el-form-item label="状态" prop="videoDuration">
               <el-radio-group v-model="form.status" size="small">
-                <el-radio-button label="0">正常</el-radio-button>
-                <el-radio-button label="1">禁用</el-radio-button>
+                <el-radio-button label="1">正常</el-radio-button>
+                <el-radio-button label="0">停用</el-radio-button>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -160,7 +158,6 @@ import {delVideo, getVideo, listVideo, updateVideo} from "@/api/business/resourc
 
 export default {
   name: "Video",
-  dicts: ['sys_normal_disable'],
   components: {VideoCard},
   data() {
     return {
@@ -201,6 +198,14 @@ export default {
           src: ""
         }],
       },
+      // 视频状态选项
+      options: [{
+        value: '1',
+        label: '正常'
+      }, {
+        value: '0',
+        label: '停用'
+      },],
       // 遮罩层
       loading: true,
       // 选中数组
