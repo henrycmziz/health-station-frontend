@@ -96,7 +96,7 @@
         </el-form-item>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="状态" prop="videoDuration">
+            <el-form-item label="状态" prop="status">
               <el-radio-group v-model="form.status" size="small">
                 <el-radio-button label="1">正常</el-radio-button>
                 <el-radio-button label="0">停用</el-radio-button>
@@ -242,6 +242,11 @@ export default {
   },
   created() {
     this.getList();
+  },
+  computed: {
+    player() {
+      return this.$refs.videoPlayer.player
+    }
   },
   methods: {
     // 关闭弹窗结束播放视频
