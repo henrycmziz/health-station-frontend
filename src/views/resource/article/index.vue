@@ -167,7 +167,7 @@
     />
 
     <!-- 添加或修改健康小知识对话框 -->
-    <el-dialog :title="title" :visible.sync="open" :before-close="handleClose" @close="dialogClose" width="66%" center
+    <el-dialog :title="title" :visible.sync="open" :before-close="handleClose" width="66%" center
                append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px" style="padding-right: 40px">
         <el-row>
@@ -273,22 +273,22 @@ export default {
               headers: {Authorization: "Bearer " + getToken()},
               // 单个文件上传成功之后
               onSuccess: (file, res) => {
-                console.log(`${file.name} 上传成功`, res)
+                // console.log(`${file.name} 上传成功`, res)
               },
               // 单个文件上传失败
               onFailed: (file, res) => {
-                console.log(`${file.name} 上传失败`, res)
+                // console.log(`${file.name} 上传失败`, res)
               },
               // 上传错误，或者触发 timeout 超时
               onError: (file, err, res) => {
-                console.log(`${file.name} 上传出错`, err, res)
+                // console.log(`${file.name} 上传出错`, err, res)
               }
             },
             insertImage: {
               onInsertedImage(imageNode) {
                 if (imageNode == null) return
                 const {src, alt, url, href} = imageNode
-                console.log('inserted image', src, alt, url, href)
+                // console.log('inserted image', src, alt, url, href)
                 // TODO this.imageInsertList.push(url)
               },
             }
@@ -399,9 +399,10 @@ export default {
     handleClose(done) {
       this.$modal.confirm('表单未保存，确认关闭？').then(_ => {
         done();
+        this.editorReset()
       });
     },
-    dialogClose() {
+    editorReset() {
       this.wangEditor.getEditable().clear()
       this.wangEditor.getEditable().unFullScreen()
     },
@@ -409,6 +410,7 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      this.editorReset()
     },
     // 表单重置
     reset() {
@@ -477,17 +479,18 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          console.log('form: ', this.form)
           if (this.form.id != null) {
             updateArticle(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
-              this.handleImageRemove();
+              // this.handleImageRemove();
               this.open = false;
               this.getList();
             });
           } else {
             addArticle(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
-              this.handleImageRemove();
+              // this.handleImageRemove();
               this.open = false;
               this.getList();
             });
@@ -495,7 +498,7 @@ export default {
         }
       });
     },
-    /** 从服务器中删除文本中删除图片 */
+    /** TODO 从服务器中删除文本中删除图片 */
     handleImageRemove() {
       console.log('getEditable', this.wangEditor.getEditable().getElemsByType('image'))
       this.imageLastList = this.wangEditor.getEditable().getElemsByType('image')
@@ -512,13 +515,6 @@ export default {
       }).catch(() => {
       });
     },
-  },
-  watch: {
-    imageInsertList: {
-      handler(curr, old) {
-        console.log(`old: ${old}, curr: ${curr}`)
-      }
-    }
   }
 };
 </script>
