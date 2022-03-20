@@ -274,7 +274,7 @@ export default {
               onSuccess: (file, res) => {
                 // console.log(`${file.name} 上传成功`, res)
                 let url = res.data.url
-                res.data.url = this.insertStr(url, 25, process.env.VUE_APP_BASE_API)
+                res.data.url = this.insertStr(url, url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
               },
               // 单个文件上传失败
               onFailed: (file, res) => {
