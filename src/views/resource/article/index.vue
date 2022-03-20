@@ -221,7 +221,7 @@
         <we-editable
           editable-class="we-editor-view-editable"
           :option="wangEditorView.editable"
-          :html.sync="viewArticle"/>
+        />
       </div>
     </el-drawer>
   </div>
@@ -272,7 +272,6 @@ export default {
               headers: {Authorization: "Bearer " + getToken()},
               // 自定义插入图片
               customInsert: (res, insertFn) => {
-                console.log('res', res)
                 // res 即服务端的返回结果
                 const url = this.insertStr(res.data.url, res.data.url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
                 const alt = '', href = ''
@@ -304,7 +303,7 @@ export default {
         },
         delay: 1000
       }),
-      wangEditorView: useWangEditor({config: {readOnly: true}}),
+      wangEditorView: useWangEditor(),
       // 遮罩层
       loading: true,
       // 选中数组
@@ -396,7 +395,7 @@ export default {
     // 文章状态修改
     handleStatusChange(row) {
       let text = row.status === 1 ? "启用" : "停用";
-      this.$modal.confirm('确认要"' + text + '""' + row.title + '"吗？').then(function () {
+      this.$modal.confirm('确认要' + text + ' "' + row.title + '" 吗？').then(function () {
         return changeArticleStatus({id: row.id, status: row.status});
       }).then(() => {
         this.$modal.msgSuccess(text + "成功");
@@ -412,7 +411,6 @@ export default {
       })
     },
     editorReset() {
-      // this.wangEditor.clearContent()
       this.wangEditor.getEditable().unFullScreen()
     },
     // 取消按钮
@@ -470,8 +468,12 @@ export default {
     /** 文章预览 */
     handleArticleView(row) {
       this.viewTitle = row.title
-      this.viewArticle = row.article
+      this.wangEditorView.editable.config.readOnly = false
+      this.wangEditorView.editable.defaultHtml = row.article
       this.viewOpen = true
+      this.$nextTick(() => {
+        this.wangEditorView.editable.config.readOnly = true
+      })
     },
     /** url有效性检查 */
     async urlValid(url) {
@@ -526,6 +528,13 @@ export default {
     insertStr(source, start, insertedStr) {
       return source.slice(0, start) + insertedStr + source.slice(start);
     },
+  },
+  watch: {
+    viewArticle: {
+      handler(n, o) {
+        console.log(`n: ${n}\no: ${o}`)
+      }
+    }
   }
 };
 </script>
@@ -552,7 +561,7 @@ export default {
   }
 
   &-editable {
-    height: 500px;
+    //height: 500px;
   }
 }
 
