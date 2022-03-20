@@ -273,6 +273,8 @@ export default {
               // 单个文件上传成功之后
               onSuccess: (file, res) => {
                 // console.log(`${file.name} 上传成功`, res)
+                let url = res.data.url
+                res.data.url = this.insertStr(url, 25, process.env.VUE_APP_BASE_API)
               },
               // 单个文件上传失败
               onFailed: (file, res) => {
@@ -514,6 +516,9 @@ export default {
       }).catch(() => {
       });
     },
+    insertStr(source, start, insertedStr) {
+      return source.slice(0, start) + insertedStr + source.slice(start);
+    },
   }
 };
 </script>
@@ -546,19 +551,6 @@ export default {
 
 .el-dialog:not(.is-fullscreen) {
   margin-top: 6px !important;
-}
-
-.popper-class {
-  position: absolute;
-  border-radius: 4px;
-  padding: 10px;
-  z-index: 2000;
-  font-size: 12px;
-  line-height: 1.2;
-  min-width: 10px;
-  word-wrap: break-word;
-  background: #303133;
-  color: #FFFFFF;
 }
 
 //.we-editor-toolbar {
