@@ -270,11 +270,18 @@ export default {
               fieldName: 'file',
               maxFileSize: 10 * 1024 * 1024,
               headers: {Authorization: "Bearer " + getToken()},
+              // 自定义插入图片
+              customInsert: (res, insertFn) => {
+                console.log('res', res)
+                // res 即服务端的返回结果
+                const url = this.insertStr(res.data.url, res.data.url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
+                const alt = '', href = ''
+                // 从 res 中找到 url alt href ，然后插入图片
+                insertFn(url, alt, href)
+              },
               // 单个文件上传成功之后
               onSuccess: (file, res) => {
                 // console.log(`${file.name} 上传成功`, res)
-                let url = res.data.url
-                res.data.url = this.insertStr(url, url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
               },
               // 单个文件上传失败
               onFailed: (file, res) => {
