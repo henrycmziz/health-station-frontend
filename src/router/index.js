@@ -1,10 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
-Vue.use(Router)
-
 /* Layout */
 import Layout from '@/layout'
+
+Vue.use(Router)
 
 /**
  * Note: 路由配置项
@@ -68,7 +67,7 @@ export const constantRoutes = [
         path: 'index',
         component: (resolve) => require(['@/views/index'], resolve),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        meta: {title: '首页', icon: 'dashboard', affix: true}
       }
     ]
   },
@@ -82,7 +81,7 @@ export const constantRoutes = [
         path: 'profile',
         component: (resolve) => require(['@/views/system/user/profile/index'], resolve),
         name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' }
+        meta: {title: '个人中心', icon: 'user'}
       }
     ]
   },
@@ -95,7 +94,7 @@ export const constantRoutes = [
         path: 'role/:userId(\\d+)',
         component: (resolve) => require(['@/views/system/user/authRole'], resolve),
         name: 'AuthRole',
-        meta: { title: '分配角色', activeMenu: '/system/user' }
+        meta: {title: '分配角色', activeMenu: '/system/user'}
       }
     ]
   },
@@ -108,7 +107,7 @@ export const constantRoutes = [
         path: 'user/:roleId(\\d+)',
         component: (resolve) => require(['@/views/system/role/authUser'], resolve),
         name: 'AuthUser',
-        meta: { title: '分配用户', activeMenu: '/system/role' }
+        meta: {title: '分配用户', activeMenu: '/system/role'}
       }
     ]
   },
@@ -121,7 +120,7 @@ export const constantRoutes = [
         path: 'index/:dictId(\\d+)',
         component: (resolve) => require(['@/views/system/dict/data'], resolve),
         name: 'Data',
-        meta: { title: '字典数据', activeMenu: '/system/dict' }
+        meta: {title: '字典数据', activeMenu: '/system/dict'}
       }
     ]
   },
@@ -134,7 +133,7 @@ export const constantRoutes = [
         path: 'index',
         component: (resolve) => require(['@/views/monitor/job/log'], resolve),
         name: 'JobLog',
-        meta: { title: '调度日志', activeMenu: '/monitor/job' }
+        meta: {title: '调度日志', activeMenu: '/monitor/job'}
       }
     ]
   },
@@ -147,14 +146,39 @@ export const constantRoutes = [
         path: 'index',
         component: (resolve) => require(['@/views/tool/gen/editTable'], resolve),
         name: 'GenEdit',
-        meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
+        meta: {title: '修改生成配置', activeMenu: '/tool/gen'}
       }
     ]
-  }
+  },
+  {
+    path: '/questionnaire',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'detail/:id(\\d+)',
+        component: (resolve) => require(['@/views/questionnaire/Detail'], resolve),
+        name: 'Detail',
+        meta: {title: '问卷详细', activeMenu: '/questionnaire/collection'}
+      },
+      {
+        path: 'analysis/:id(\\d+)',
+        component: (resolve) => require(['@/views/questionnaire/Analysis'], resolve),
+        name: 'Analysis',
+        meta: {title: '问卷分析', activeMenu: '/questionnaire/collection'}
+      },
+    ]
+  },
+  {
+    path: '/questionnaire/fill-in/:id(\\d+)',
+    component: (resolve) => require(['@/views/questionnaire/fill-in/index'], resolve),
+    meta: {title: '问卷填写'},
+    hidden: true
+  },
 ]
 
 export default new Router({
   mode: 'history', // 去掉url中的#
-  scrollBehavior: () => ({ y: 0 }),
+  scrollBehavior: () => ({y: 0}),
   routes: constantRoutes
 })

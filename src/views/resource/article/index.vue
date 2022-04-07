@@ -228,6 +228,7 @@
 </template>
 
 <script>
+import {getToken} from "@/utils/auth";
 import {
   addArticle,
   changeArticleStatus,
@@ -239,8 +240,6 @@ import {
 import {useWangEditor, WeEditable, WeEditor} from 'wangeditor5-for-vue2'
 import '@wangeditor/editor/dist/css/style.css'
 import Ping from 'ping-url'
-
-const {getToken} = require("@/utils/auth");
 
 export default {
   name: "Article",
@@ -566,7 +565,7 @@ export default {
 }
 
 .el-dialog:not(.is-fullscreen) {
-  margin-top: 6px !important;
+  margin-top: 1vh !important;
 }
 
 //.we-editor-toolbar {
