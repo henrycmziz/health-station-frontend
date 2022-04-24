@@ -20,6 +20,19 @@
     <el-dialog :title="title" :visible.sync="dialogOutlineDataVisible" append-to-body center>
       <el-descriptions class="margin-top" :column="1" border>
         <el-descriptions-item label="问卷描述">{{ description }}</el-descriptions-item>
+        <el-descriptions-item label="问卷链接" v-if="status==='COLLECTING'">
+          <el-link class="copy-link" icon="el-icon-link" :underline="false"
+                   target="_blank" @click="copy"
+                   :data-clipboard-text="genLink(this.id)"
+                   data-clipboard-action="copy"
+                   type="primary"
+          >
+            点击复制链接
+          </el-link>
+          <span style="margin-left: 20px;cursor: pointer" @click="showQRCode()">
+                  <em class="el-icon-view"></em>查看二维码
+          </span>
+        </el-descriptions-item>
         <el-descriptions-item label="问卷状态">
           <el-tag :type="status==='COLLECTING'?'success':status==='EDITING'?'primary':'warning'">
             <em
@@ -44,6 +57,12 @@
       </span>
     </el-dialog>
 
+    <el-dialog
+      :title="'问卷 '+this.title+' 二维码'" :visible.sync="showQRCodeDialogVisible" @open="showQRCode"
+      width="30%" center append-to-body>
+      <div id="qrcode" ref="qrcode" class="qrcode"></div>
+    </el-dialog>
+
     <el-drawer :visible.sync="previewDrawer" :close-on-click-modal="true">
       <preview :questionnaire-id="id"/>
     </el-drawer>
@@ -53,11 +72,12 @@
 <script>
 import Clipboard from "clipboard";
 import Preview from "@/views/questionnaire/components/Preview";
+import QRCode from 'qrcodejs2'
 import {parseTime} from "@/utils/ruoyi";
 
 export default {
   name: "questionnaire-card",
-  components: {Preview},
+  components: {Preview, QRCode},
   props: {
     id: Number,
     title: String,
@@ -71,6 +91,7 @@ export default {
   data() {
     return {
       dialogOutlineDataVisible: false,
+      showQRCodeDialogVisible: false,
       previewDrawer: false,
       translateLabel: {
         'COLLECTING': '收集中',
@@ -108,21 +129,68 @@ export default {
         endTime: ''
       });
     },
+    getLocalhostPath() {
+      // 获取当前页面地址，如http://localhost:8080/admin/index
+      let wPath = window.document.location.href;
+      // 获取当前页面主机地址之后的目录，如：/admin/index
+      let pathName = this.$route.path;
+      let pos = wPath.indexOf(pathName);
+      // 获取主机地址，如：http://localhost:8080
+      return wPath.substring(0, pos);
+    },
+    genLink(id) {
+      return this.getLocalhostPath() + '/questionnaire/fill-in?qid=' + id;
+    },
     copy() {
       const clipboard = new Clipboard('.copy-link')
       clipboard.on('success', e => {
-        this.$message({message: "复制成功", duration: 1000})
+        this.$modal.msgSuccess("复制成功")
         // 释放内存
         clipboard.destroy()
       })
       clipboard.on('error', e => {
+        this.$modal.msgWarning("复制失败")
         // 释放内存
         clipboard.destroy()
       })
     },
+    showQRCode() {
+      console.log(this.genLink(this.id))
+      //调用函数生成二维码
+      this.$nextTick(function () {
+        //二维码初始化 点击一次添加一个二维码
+        this.$refs.qrcode.innerHTML = "";
+        this.qrcode(124, 124, this.genLink(this.id), "canvas");
+      });
+      //打开遮罩
+      this.showQRCodeDialogVisible = true;
+    },
+
+    /**
+     * @description 生成二维码
+     * @param  {number} qWidth  宽度px
+     * @param  {number} qHeight  高度px
+     * @param  {string} qText  二维码内容（跳转连接）
+     * @param  {string} qRender 渲染方式（有两种方式 table和canvas，默认是canvas）
+     */
+    qrcode(qWidth, qHeight, qText, qRender) {
+      let qrcode = new QRCode("qrcode", {
+        width: qWidth,
+        height: qHeight,
+        text: qText,
+        render: qRender
+      });
+    }
   }
 }
 </script>
+<style lang="scss">
+.qrcode {
+  img {
+    margin: 0 auto;
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 ::v-deep .el-dialog__body {

@@ -115,6 +115,7 @@ export default {
         for (const t of tempList) {
           t.isBoxSelected = false;
           t.nanoid = nanoid();
+          t.details.date = new Date(t.details.date)
           resList.push(t);
         }
         this.questionList = resList;

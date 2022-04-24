@@ -115,7 +115,7 @@
           </el-button>
           <el-link icon="el-icon-link" :href="scope.row.articleUrl" target="_blank"
                    :underline="false"
-                   :type="scope.row.linkType===true?'success':'warning'"
+                   :type="scope.row['linkType']===true?'success':'warning'"
                    v-else>查看
           </el-link>
         </template>

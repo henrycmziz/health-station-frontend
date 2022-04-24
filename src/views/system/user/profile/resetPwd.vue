@@ -17,7 +17,8 @@
 </template>
 
 <script>
-import { updateUserPwd } from "@/api/system/user";
+import {updateUserPwd} from "@/api/system/user";
+import {aesDecrypt, aesEncrypt} from "@/utils/cryptoUtil";
 
 export default {
   data() {
@@ -37,15 +38,15 @@ export default {
       // 表单校验
       rules: {
         oldPassword: [
-          { required: true, message: "旧密码不能为空", trigger: "blur" }
+          {required: true, message: "旧密码不能为空", trigger: "blur"}
         ],
         newPassword: [
-          { required: true, message: "新密码不能为空", trigger: "blur" },
-          { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" }
+          {required: true, message: "新密码不能为空", trigger: "blur"},
+          {min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur"}
         ],
         confirmPassword: [
-          { required: true, message: "确认密码不能为空", trigger: "blur" },
-          { required: true, validator: equalToPassword, trigger: "blur" }
+          {required: true, message: "确认密码不能为空", trigger: "blur"},
+          {required: true, validator: equalToPassword, trigger: "blur"}
         ]
       }
     };
@@ -54,7 +55,11 @@ export default {
     submit() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          updateUserPwd(this.user.oldPassword, this.user.newPassword).then(response => {
+          const form = {
+            oldPassword: this.user.oldPassword,
+            newPassword: this.user.newPassword
+          };
+          updateUserPwd(aesEncrypt(JSON.stringify(form))).then(response => {
             this.$modal.msgSuccess("修改成功");
           });
         }

@@ -136,9 +136,9 @@ export default {
       answerList: [],
       questionnaire: {
         isBoxSelected: false,
+        questionnaireId: this.$route.query.qid,
         questionnaireDescription: "Description",
         questionnaireTitle: "Title",
-        questionnaireId: this.$route.params.id,
       },
       submitVisible: false,
       resetVisible: false,
@@ -197,8 +197,14 @@ export default {
     },
     submitAnswer() {
       if (this.checkValidate()) {
-        this.$modal.confirm('确认提交?').then(() => {
+        this.$confirm('确认提交?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          customClass: 'confirm-box'
+        }).then(() => {
           return submitAnswer({
+            uid: this.$route.query.uid === undefined ? 0 : this.$route.query.uid,
             questionnaireId: this.questionnaire.questionnaireId,
             answerList: this.answerList
           });
@@ -213,7 +219,12 @@ export default {
       }
     },
     resetAnswer() {
-      this.$modal.confirm('作答未被保存, 确认重置?').then(() => {
+      this.$confirm('作答未被保存, 确认重置?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        customClass: 'confirm-box'
+      }).then(() => {
         this.fetchData();
         this.resetVisible = false;
       });
@@ -261,8 +272,13 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style>
+.confirm-box {
+  width: 344px;
+}
+</style>
 
+<style lang="scss" scoped>
 .main-answer-list {
   max-width: 800px;
 }

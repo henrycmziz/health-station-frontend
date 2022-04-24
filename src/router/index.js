@@ -170,7 +170,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/questionnaire/fill-in/:id(\\d+)',
+    path: '/questionnaire/fill-in',
     component: (resolve) => require(['@/views/questionnaire/fill-in/index'], resolve),
     meta: {title: '问卷填写'},
     hidden: true

@@ -8,7 +8,7 @@
                       @addNewQuestion="addNewQuestion"
           ></select-bar>
         </el-col>
-        <el-col :sm="15" :md="16" :lg="19" :xl="20" class="create-page-question-list">
+        <el-col :sm="15" :md="16" :lg="19" :xl="19" class="create-page-question-list">
           <question-detail ref="mainQuestionList"></question-detail>
         </el-col>
       </el-row>

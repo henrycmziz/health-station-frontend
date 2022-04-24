@@ -4,14 +4,9 @@
       <el-col>
         <TypeChooseBox @changeShow="changeShow"></TypeChooseBox>
       </el-col>
-      <el-col align="end" class="hidden-xs-only">
-        <el-button class="create-button"
-                   @click="gotoCreate"
-                   type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-        >创建问卷
-        </el-button>
+      <el-col align="end">
+        <el-button @click="pushQuestionnaire" type="primary" icon="el-icon-s-promotion" size="small">推送问卷</el-button>
+        <el-button @click="gotoCreate" type="primary" icon="el-icon-plus" size="small">创建问卷</el-button>
       </el-col>
     </el-row>
 
@@ -67,6 +62,9 @@ export default {
         this.$modal.msgError("问卷读取失败！");
       })
     },
+    pushQuestionnaire() {
+
+    },
     gotoCreate() {
       addQuestionnaire().then((response) => {
         this.$router.push('/questionnaire/detail/' + response.data);
@@ -115,7 +113,4 @@ export default {
   margin-left: 10px;
 }
 
-.row-right {
-  float: right;
-}
 </style>

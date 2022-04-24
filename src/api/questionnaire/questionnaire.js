@@ -28,7 +28,7 @@ export function saveQuestionnaire(data) {
 // 查询问卷详细
 export function getQuestionnaire(questionnaireId) {
   return request({
-    url: '/questionnaire/' + questionnaireId,
+    url: '/questionnaire/' + questionnaireId + '/info',
     method: 'get'
   })
 }
