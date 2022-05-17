@@ -17,6 +17,14 @@ export function getVideo(id) {
   })
 }
 
+// 查询视频信息详细
+export function getVideoByIds(ids) {
+  return request({
+    url: '/resource/video/infos/' + ids,
+    method: 'get'
+  })
+}
+
 // 修改视频信息
 export function updateVideo(data) {
   return request({

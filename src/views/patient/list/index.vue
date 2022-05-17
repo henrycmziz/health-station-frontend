@@ -118,50 +118,62 @@
             >删除
             </el-button>
           </el-col>
-<!--          <el-col :span="1.5">-->
-<!--            <el-button-->
-<!--              type="info"-->
-<!--              plain-->
-<!--              icon="el-icon-upload2"-->
-<!--              size="mini"-->
-<!--              @click="handleImport"-->
-<!--              v-hasPermi="['patient:info:import']"-->
-<!--            >导入-->
-<!--            </el-button>-->
-<!--          </el-col>-->
-<!--          <el-col :span="1.5">-->
-<!--            <el-button-->
-<!--              type="warning"-->
-<!--              plain-->
-<!--              icon="el-icon-download"-->
-<!--              size="mini"-->
-<!--              @click="handleExport"-->
-<!--              v-hasPermi="['patient:info:export']"-->
-<!--            >导出-->
-<!--            </el-button>-->
-<!--          </el-col>-->
-          <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+          <!--          <el-col :span="1.5">
+                      <el-button
+                        type="info"
+                        plain
+                        icon="el-icon-upload2"
+                        size="mini"
+                        @click="handleImport"
+                        v-hasPermi="['patient:info:import']"
+                      >导入
+                      </el-button>
+                    </el-col>
+                    <el-col :span="1.5">
+                      <el-button
+                        type="warning"
+                        plain
+                        icon="el-icon-download"
+                        size="mini"
+                        @click="handleExport"
+                        v-hasPermi="['patient:info:export']"
+                      >导出
+                      </el-button>
+                    </el-col>-->
+          <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
         </el-row>
 
         <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center"/>
-          <!--          <el-table-column label="患者编号" align="center" key="userId" prop="userId" v-if="columns[0].visible"/>-->
+          <el-table-column label="序号" type="index" width="50" align="center" v-if="columns[0].visible">
+            <template slot-scope="scope">
+              <span>{{ (queryParams.pageNum - 1) * queryParams.pageSize + scope.$index + 1 }}</span>
+            </template>
+          </el-table-column>
           <!--          <el-table-column label="患者用户名" align="center" key="userName" prop="userName" v-if="columns[1].visible"-->
           <!--                           :show-overflow-tooltip="true"/>-->
-          <el-table-column label="患者姓名" align="center" key="nickName" prop="nickName" v-if="columns[2].visible"
+          <el-table-column label="患者姓名" align="center" key="nickName" prop="nickName" v-if="columns[1].visible"
                            :show-overflow-tooltip="true"/>
-          <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" v-if="columns[4].visible"
+          <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" v-if="columns[2].visible"
                            width="120"/>
           <el-table-column label="患者类型" align="center" key="typeName" prop="type.typeName" v-if="columns[3].visible"
                            :show-overflow-tooltip="true"/>
-          <el-table-column label="激活状态" align="center" key="isActive" v-if="columns[5].visible">
+          <el-table-column label="激活状态" align="center" key="isActive" v-if="columns[4].visible">
             <template v-slot="scope">
               <el-tag :type="scope.row.isActive=== 0 ? 'primary' : 'success'">
                 {{ scope.row.isActive === 0 ? '未激活' : '已激活' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="状态" align="center" key="status" v-if="columns[5].visible">
+          <el-table-column label="打卡状态" align="center" key="isClockIn" v-if="columns[5].visible">
+            <template v-slot="scope">
+              <el-tag :type="scope.row.isClockIn=== 0 ? 'primary' : 'success'">
+                <em :class="scope.row.isClockIn === 1? 'el-icon-loading':''"/>
+                {{ scope.row.isClockIn === 0 ? '无任务' : '打卡中' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" align="center" key="status" v-if="columns[6].visible">
             <template slot-scope="scope">
               <el-switch
                 v-model="scope.row.status"
@@ -171,7 +183,7 @@
               ></el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[6].visible" width="160">
+          <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[7].visible" width="160">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
@@ -179,10 +191,18 @@
           <el-table-column
             label="操作"
             align="center"
-            width="160"
+            width="180"
             class-name="small-padding fixed-width"
           >
             <template slot-scope="scope" v-if="scope.row.userId !== 1">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-edit"
+                @click="openClockInListDrawer(scope.row)"
+                v-hasPermi="['patient:clockin:list']"
+              >打卡记录
+              </el-button>
               <el-button
                 size="mini"
                 type="text"
@@ -191,16 +211,8 @@
                 v-hasPermi="['patient:info:edit']"
               >修改
               </el-button>
-              <el-button
-                size="mini"
-                type="text"
-                icon="el-icon-delete"
-                @click="handleDelete(scope.row)"
-                v-hasPermi="['patient:info:remove']"
-              >删除
-              </el-button>
               <el-dropdown size="mini" @command="(command) => handleCommand(command, scope.row)"
-                           v-hasPermi="['patient:info:resetPwd', 'patient:info:edit']">
+                           v-hasPermi="['patient:info:resetPwd', 'patient:info:remove']">
                 <span class="el-dropdown-link">
                   <i class="el-icon-d-arrow-right el-icon--right"></i>更多
                 </span>
@@ -208,9 +220,9 @@
                   <el-dropdown-item command="handleResetPwd" icon="el-icon-key"
                                     v-hasPermi="['patient:info:resetPwd']">重置密码
                   </el-dropdown-item>
-                  <!--                  <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check"-->
-                  <!--                                    v-hasPermi="['patient:info:edit']">分配角色-->
-                  <!--                  </el-dropdown-item>-->
+                  <el-dropdown-item command="handleDelete" icon="el-icon-delete"
+                                    v-hasPermi="['patient:info:remove']">删除
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>
@@ -226,6 +238,96 @@
         />
       </el-col>
     </el-row>
+
+    <el-drawer :visible.sync="clockInDrawer.openDrawer" size="48%" append-to-body>
+      <template v-slot:title>
+        <div>
+          <span style="margin-right: 60px">{{ clockInDrawer.pName }}</span>
+          <el-button type="primary" size="small" @click.native="openCreateClockInPlanDialog"
+                     :disabled="clockInDrawer.canCreatePlan"
+                     icon="el-icon-plus">新增打卡计划
+          </el-button>
+        </div>
+      </template>
+      <div style="padding: 0 15px;height: 100%;width: 100%">
+        <el-scrollbar style="height: 100%;">
+          <el-table
+            :data="clockInDrawer.clockInHistoryData"
+            ref="outerLayerTable"
+            @row-click="handleRowClick"
+            :header-cell-style="{background:'#e6e6e6',color:'#606266'}">
+            <el-table-column type="expand">
+              <template v-slot="scope">
+                <el-table :data="scope.row['clockInDetails']"
+                          :default-sort="{prop: 'clock_in_time', order: 'descending'}"
+                          :header-cell-style="{background:'#e6e6e6',color:'#606266'}">
+                  <el-table-column prop="clockInTime" label="应打卡日期" sortable width="120"/>
+                  <el-table-column prop="isClockedIn" label="是否打卡" sortable width="120">
+                    <template v-slot="scope">
+                      <el-tag :type="scope.row['isClockedIn'] === 0 ? 'info':'success'" size="mini">
+                        {{ scope.row['isClockedIn'] === 0 ? '未打卡' : '已打卡' }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="submitTime" label="提交日期">
+                    <template v-slot="scope">
+                      {{ scope.row.submitTime }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="comment" label="评论" :show-overflow-tooltip="true"/>
+                </el-table>
+              </template>
+            </el-table-column>
+            <el-table-column prop="modelName" label="康复模型"></el-table-column>
+            <el-table-column prop="startTime" label="开始日期"></el-table-column>
+            <el-table-column prop="endTime" label="结束日期"></el-table-column>
+            <el-table-column prop="remark" label="打卡说明" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="createBy" label="创建人"></el-table-column>
+            <el-table-column prop="completionRate" label="打卡率"></el-table-column>
+          </el-table>
+        </el-scrollbar>
+      </div>
+    </el-drawer>
+
+    <el-dialog :title="'为 ' + clockInDrawer.pName + ' 创建打卡计划'" :visible.sync="createClockInPlan.openDialog"
+               @close="cancelCreateClockInForm"
+               append-to-body>
+      <el-form ref="createClockInPlan.form" :model="createClockInPlan.form" :rules="createClockInPlan.rules"
+               label-width="80px">
+        <el-row>
+          <el-form-item label="康复模型" prop="modelId">
+            <el-select
+              v-model="createClockInPlan.form.modelId"
+              placeholder="请选择康复模型"
+              clearable
+              size="small"
+            >
+              <el-option v-for="(item, index) in modelOptions" :key="index" :label="item.value" :value="item.key"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="打卡时间" prop="dateRange">
+            <el-date-picker
+              v-model="createClockInPlan.form.dateRange"
+              type="daterange"
+              align="right"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :picker-options="createClockInPlan.pickerOptions">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="打卡说明" prop="remark">
+            <el-input v-model="createClockInPlan.form.remark" placeholder="请输入打卡说明" type="textarea"/>
+          </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="mini" @click="cancelCreateClockInForm">取 消</el-button>
+        <el-button size="mini" type="primary" @click="submitCreateClockInPlanForm">确 定</el-button>
+      </div>
+    </el-dialog>
 
     <!-- 添加或修改患者配置对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
@@ -351,12 +453,14 @@ import {
   updatePatient,
   resetPatientPwd,
   changePatientStatus
-} from "@/api/patient/info";
+} from "@/api/business/patient/info";
 import {getToken} from "@/utils/auth";
-import {treeselect} from "@/api/patient/type";
+import {treeselect} from "@/api/business/patient/type";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import {pinyin} from 'pinyin-pro';
+import {addPlan, clockInHistory, getClockIn} from "@/api/business/patient/clockin";
+import {listModel} from "@/api/business/resource/model";
 
 export default {
   name: "User",
@@ -391,10 +495,8 @@ export default {
       initPassword: undefined,
       // 日期范围
       dateRange: [],
-      // 岗位选项
-      postOptions: [],
-      // 角色选项
-      roleOptions: [],
+      // 模型选项
+      modelOptions: [],
       // 表单参数
       form: {},
       defaultProps: {
@@ -416,6 +518,59 @@ export default {
         // 上传的地址
         url: process.env.VUE_APP_BASE_API + "/system/user/importData"
       },
+      clockInDrawer: {
+        pid: null,
+        pName: '',
+        canCreatePlan: false,
+        openDrawer: false,
+        clockInHistoryData: []
+      },
+      createClockInPlan: {
+        openDialog: false,
+        form: {},
+        rules: {
+          modelId: [
+            {required: true, message: "运动模型为必选项", trigger: "blur"}
+          ],
+          dateRange: [
+            {
+              required: true,
+              message: "请选择打卡时长",
+              trigger: "blur"
+            }
+          ]
+        },
+        pickerOptions: {
+          disabledDate(time) {
+            return time.getTime() < Date.now() - 8.64e7;
+          },
+          shortcuts: [{
+            text: '往后一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '往后两周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 14);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '往后一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -427,13 +582,14 @@ export default {
       },
       // 列信息
       columns: [
-        {key: 0, label: `患者编号`, visible: true},
-        {key: 1, label: `患者名称`, visible: true},
-        {key: 2, label: `患者昵称`, visible: true},
-        {key: 3, label: `类型`, visible: true},
-        {key: 4, label: `手机号码`, visible: true},
-        {key: 5, label: `状态`, visible: true},
-        {key: 6, label: `创建时间`, visible: true}
+        {key: 0, label: `序号`, visible: true},
+        {key: 1, label: `患者姓名`, visible: true},
+        {key: 2, label: `手机号码`, visible: true},
+        {key: 3, label: `患者类型`, visible: true},
+        {key: 4, label: `激活状态`, visible: true},
+        {key: 5, label: `打卡状态`, visible: true},
+        {key: 6, label: `状态`, visible: true},
+        {key: 7, label: `创建时间`, visible: false}
       ],
       // 表单校验
       rules: {
@@ -480,6 +636,59 @@ export default {
     });
   },
   methods: {
+    openClockInListDrawer(row) {
+      this.clockInDrawer.pid = row.userId
+      this.clockInDrawer.pName = row.nickName
+      this.clockInDrawer.canCreatePlan = row.isClockIn === 1
+      clockInHistory(row.userId).then(res => {
+        this.clockInDrawer.clockInHistoryData = res.data
+      })
+      this.clockInDrawer.openDrawer = true
+    },
+    handleRowClick(row) {
+      row.expanded = !row.expanded;
+      this.$refs.outerLayerTable.toggleRowExpansion(row, row.expanded);
+    },
+    openCreateClockInPlanDialog() {
+      this.createClockInPlan.form.patientId = this.clockInDrawer.pid
+      this.createClockInPlan.openDialog = true
+      listModel({modelStatus: 1}).then(res => {
+        this.modelOptions = res.rows.map(item => {
+          return {key: item.id, value: item.modelName}
+        })
+      })
+    },
+    submitCreateClockInPlanForm() {
+      if (null != this.createClockInPlan.form.dateRange && '' !== this.createClockInPlan.form.dateRange) {
+        this.createClockInPlan.form["startTime"] = this.createClockInPlan.form.dateRange[0];
+        this.createClockInPlan.form["endTime"] = this.createClockInPlan.form.dateRange[1];
+      }
+      this.$refs["createClockInPlan.form"].validate(valid => {
+        if (valid)
+          addPlan(this.createClockInPlan.form).then((() => {
+            this.$modal.msgSuccess('为患者 ' + this.clockInDrawer.pName + ' 新增打卡计划成功')
+            this.createClockInPlan.openDialog = false
+            this.clockInDrawer.openDrawer = false
+            this.getList()
+          }))
+      })
+    },
+    // 取消按钮
+    cancelCreateClockInForm() {
+      this.createClockInPlan.openDialog = false;
+      this.createClockInFormReset();
+    },
+    // 表单重置
+    createClockInFormReset() {
+      this.createClockInPlan.form = {
+        patientId: this.clockInDrawer.pid,
+        modelId: undefined,
+        startTime: undefined,
+        endTime: undefined,
+        remark: ''
+      };
+      this.resetForm("createClockInPlan.form");
+    },
     genUserName(name) {
       if (name !== undefined && this.title === "添加患者")
         this.form.userName = pinyin(name, {toneType: 'none', mode: 'surname'}).split(" ").join("")
@@ -565,8 +774,8 @@ export default {
         case "handleResetPwd":
           this.handleResetPwd(row);
           break;
-        case "handleAuthRole":
-          this.handleAuthRole(row);
+        case "handleDelete":
+          this.handleDelete(row);
           break;
         default:
           break;
@@ -677,3 +886,8 @@ export default {
   }
 };
 </script>
+<style>
+.el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+</style>

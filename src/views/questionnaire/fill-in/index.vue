@@ -4,8 +4,8 @@
             :xl="{span:14,offset:5}">
       <el-card shadow="always" class="outline-box-card">
         <div v-if="questionnaire.isBoxSelected===false">
-          <h1>{{ questionnaire.questionnaireTitle }}</h1>
-          <h3>{{ questionnaire.questionnaireDescription }}</h3>
+          <h3>{{ questionnaire.questionnaireTitle }}</h3>
+          <h5>{{ questionnaire.questionnaireDescription }}</h5>
         </div>
       </el-card>
       <el-form :disabled="cannotSubmit">

@@ -167,7 +167,7 @@
 </template>
 
 <script>
-import {listType, getType, delType, addType, updateType, listTypeExcludeChild} from "@/api/patient/type";
+import {listType, getType, delType, addType, updateType, listTypeExcludeChild} from "@/api/business/patient/type";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 

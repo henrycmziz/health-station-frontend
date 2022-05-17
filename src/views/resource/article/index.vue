@@ -98,6 +98,18 @@
     <el-table v-loading="loading" :data="articleList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center"/>
       <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true"/>
+      <el-table-column label="缩略图" align="center" prop="thumbnail">
+        <template slot-scope="scope">
+          <!--          <img v-if="scope.row.thumbnail != null && scope.row.thumbnail !== ''"-->
+          <!--               :src="baseUrl + scope.row.thumbnail" alt="" height="30px">-->
+          <el-image
+            v-if="scope.row.thumbnail != null && scope.row.thumbnail !== ''"
+            :src="baseUrl + scope.row.thumbnail"
+            :preview-src-list="[baseUrl + scope.row.thumbnail]"
+            style="height: 30px">
+          </el-image>
+        </template>
+      </el-table-column>
       <el-table-column label="来源" align="center" prop="articleFrom">
         <template slot-scope="scope">
           {{ scope.row.articleFrom === 0 ? '自建' : '网络' }}
@@ -193,6 +205,11 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row>
+          <el-form-item label="缩略图" prop="thumbnail">
+            <image-upload :limit="1" v-model="form.thumbnail" v-on:input="imageUpload"></image-upload>
+          </el-form-item>
+        </el-row>
         <el-form-item label="正文" v-if="form.articleFrom === 0" key="0">
           <we-editor
             class="we-editor"
@@ -257,6 +274,7 @@ export default {
       }
     };
     return {
+      baseUrl: process.env.VUE_APP_BASE_API,
       // 插入图片url list
       imageInsertList: [],
       // 文章保存时 图片url list
@@ -272,6 +290,7 @@ export default {
               // 自定义插入图片
               customInsert: (res, insertFn) => {
                 // res 即服务端的返回结果
+                // const url = this.insertStr(res.data.url, res.data.url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
                 const url = this.insertStr(res.data.url, res.data.url.indexOf('profile') - 1, process.env.VUE_APP_BASE_API)
                 const alt = '', href = ''
                 // 从 res 中找到 url alt href ，然后插入图片
@@ -355,6 +374,7 @@ export default {
       },
       // 表单参数
       form: {},
+      thumbnails: [],
       // 表单校验
       rules: {
         title: [
@@ -426,10 +446,11 @@ export default {
         articleFrom: 0,
         article: '',
         articleUrl: null,
-        // thumbnail: null,
+        thumbnail: null,
         status: 1,
       };
       this.resetForm("form");
+      this.thumbnails = []
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -462,6 +483,8 @@ export default {
         this.form = response.data;
         this.open = true;
         this.title = "修改健康小知识";
+        if (response.data.thumbnail != null && response.data.thumbnail !== '')
+          this.thumbnails.push(response.data.thumbnail)
       });
     },
     /** 文章预览 */
@@ -485,10 +508,19 @@ export default {
       }
       return false
     },
+    imageUpload(str) {
+      this.form.thumbnail = str
+      console.log(str)
+      console.log('sssssss: ', this.form)
+    },
     /** 提交按钮 */
     submitForm() {
+      console.log('form: ', this.form);
       this.$refs["form"].validate(valid => {
         if (valid) {
+          // if (this.thumbnails != null) {
+          //   this.form.thumbnail = this.thumbnails[0]
+          // }
           if (this.form.id != null) {
             updateArticle(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
@@ -564,10 +596,6 @@ export default {
   }
 }
 
-.el-dialog:not(.is-fullscreen) {
-  margin-top: 1vh !important;
-}
-
 //.we-editor-toolbar {
 //  border-bottom: 1px solid #e5e5e5;
 //}
@@ -592,4 +620,20 @@ export default {
 //  justify-content: center;
 //  padding: 10px 20px;
 //}
+</style>
+
+<style scoped lang="scss">
+//.el-dialog:not(.is-fullscreen) {
+//  margin-top: 1vh !important;
+//}
+
+::v-deep .el-upload-list--picture-card .el-upload-list__item {
+  width: 269px !important;
+  height: 152px !important;
+}
+
+::v-deep .el-upload--picture-card {
+  width: 269px !important;
+  height: 152px !important;
+}
 </style>

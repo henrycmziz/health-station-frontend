@@ -67,6 +67,10 @@ export default {
     isShowTip: {
       type: Boolean,
       default: true
+    },
+    uploadImgUrl: {
+      type: String,
+      default: process.env.VUE_APP_BASE_API + "/common/upload"
     }
   },
   data() {
@@ -75,7 +79,7 @@ export default {
       dialogVisible: false,
       hideUpload: false,
       baseUrl: process.env.VUE_APP_BASE_API,
-      uploadImgUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 上传的图片服务器地址
+      // uploadImgUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 上传的图片服务器地址
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -90,14 +94,15 @@ export default {
           const list = Array.isArray(val) ? val : this.value.split(',');
           // 然后将数组转为对象数组
           this.fileList = list.map(item => {
+            let res;
             if (typeof item === "string") {
-              if (item.indexOf(this.baseUrl) === -1) {
-                item = {name: this.baseUrl + item, url: this.baseUrl + item};
-              } else {
-                item = {name: item, url: item};
-              }
+              // if (item.indexOf(this.baseUrl) === -1) {
+              res = {name: item.slice(item.lastIndexOf('/') + 1), url: this.baseUrl + item};
+              // } else {
+              //   item = {name: item, url: item};
+              // }
             }
-            return item;
+            return res;
           });
         } else {
           this.fileList = [];
@@ -113,6 +118,13 @@ export default {
     showTip() {
       return this.isShowTip && (this.fileType || this.fileSize);
     },
+    // fileList() {
+    //   let fileList = [];
+    //   for (const element of this.value) {
+    //     fileList.push({url: element});
+    //   }
+    //   return fileList;
+    // }
   },
   methods: {
     // 删除图片
@@ -124,7 +136,7 @@ export default {
       }
       // 删除服务器文件
       if (file.status === "success")
-        delFile({"pathFileName": file.name}).then(response => {
+        delFile({"pathFileName": file.url.replace(this.baseUrl, "")}).then(response => {
           this.$modal.msgSuccess(response.msg);
         });
     },
