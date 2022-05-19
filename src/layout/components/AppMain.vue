@@ -2,9 +2,13 @@
   <section class="app-main">
     <transition name="fade-transform" mode="out-in">
       <keep-alive :include="cachedViews">
-        <router-view :key="key" />
+        <router-view :key="key"/>
       </keep-alive>
     </transition>
+    <div class="footer">
+      <p/>
+      Copyright © 2022 Henry 🙂 Base on <a href="https://github.com/yangzongzhuan/RuoYi-Vue" target="_blank">RuoYi-Vue</a>
+    </div>
   </section>
 </template>
 
@@ -31,7 +35,7 @@ export default {
   overflow: hidden;
 }
 
-.fixed-header+.app-main {
+.fixed-header + .app-main {
   padding-top: 50px;
 }
 
@@ -41,9 +45,15 @@ export default {
     min-height: calc(100vh - 84px);
   }
 
-  .fixed-header+.app-main {
+  .fixed-header + .app-main {
     padding-top: 84px;
   }
+}
+
+.footer {
+  margin: 15px;
+  text-align: center;
+  font-size: small;
 }
 </style>
 

@@ -28,6 +28,10 @@
         </el-col>
       </el-row>
     </div>
+    <div class="footer">
+      <p/>
+      ❤️ Skin from <a href="https://github.com/Kfor/questionnaire" target="_blank">Kfor/questionnaire</a>
+    </div>
   </div>
 </template>
 
@@ -113,4 +117,9 @@ export default {
   margin-left: 10px;
 }
 
+.footer {
+  margin: 30px 15px 15px 0;
+  text-align: center;
+  font-size: small;
+}
 </style>
